@@ -203,9 +203,7 @@ class Engine:
                 # Make a copy of the command to avoid modifying the model
                 cmd: command.Command = self.__dictcmd__[cmdname].cmd.clone()
                 args, kwargs = cmd.parse(cmdline)
-                # Explicitly test None because it can return empty list and dict
-                if args is not None and kwargs is not None:
-                    return self.__dictcmd__[cmdname].fct(*args, **kwargs)
+                return self.__dictcmd__[cmdname].fct(*args, **kwargs)
             except KeyError:
                 print(style.Style.error("Command " + cmdname + " not found"))
             except exception.CException as err:
@@ -256,7 +254,7 @@ class Engine:
         varname = varname.upper()
         return self.__dictvar__[varname].value
 
-    def getval(self, varname: str):
+    def getval(self, varname: str)->str:
         # return a copy of the variable
         return copy.deepcopy(self.getvar(varname))
 
