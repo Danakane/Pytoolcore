@@ -236,7 +236,7 @@ class Engine:
         return varnames
 
     def addvar(self, varname: str, description: str,
-               settable: str, value="") -> None:
+               settable: bool, value="") -> None:
         if varname:
             varname = varname.upper()
             try:
