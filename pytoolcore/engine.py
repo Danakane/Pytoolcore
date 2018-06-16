@@ -269,7 +269,6 @@ class Engine:
         print("\n\t" + self.__modulename__ + " module by " + self.__author__ + "\n")
 
     def run(self) -> None:
-        self.splash()
         self.__running__ = True
         while self.__running__:
             try:
