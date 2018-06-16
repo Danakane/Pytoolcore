@@ -89,4 +89,4 @@ class Style:
 
 
 def clear()-> None:
-    print("\x1b[2J\x1b[H")
+    print("\x1b[2J\x1b[H", end="")
