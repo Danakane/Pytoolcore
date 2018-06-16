@@ -131,10 +131,9 @@ class Engine:
 
     def __help__(self, cmd: str) -> bool:
         try:
-            helpstr: str = style.Style.info("Here is " + cmd +
-                                            "'s help\n" + self.__dictcmd__[cmd].__help__)
+            print(style.Style.info("Here is " + cmd + "'s help\n" +
+                                   self.__dictcmd__[cmd].__help__))
 
-            print(helpstr)
         except KeyError:
             print(style.Style.error("Keyword " + cmd + " isn't a defined command."))
         return True
@@ -145,13 +144,13 @@ class Engine:
             self.__dictvar__[varname].value = value
             if not value:
                 value = '""'
-            style.Style.success("Variable " + varname +
-                                " set to " + str(value))
+            print(style.Style.success("Variable " + varname +
+                                      " set to " + str(value)))
         except exception.CException:
-            style.Style.failure("Impossible to assign " + varname +
-                                " to " + str(value) + " with set command")
+            print(style.Style.failure("Impossible to assign " + varname +
+                                      " to " + str(value) + " with set command"))
         except KeyError:
-            style.Style.error("Variable " + varname + " isn't defined.")
+            print(style.Style.error("Variable " + varname + " isn't defined."))
         return True
 
     def __reset__(self, varname: str) -> bool:
@@ -261,7 +260,7 @@ class Engine:
         varname = varname.upper()
         return self.__dictvar__[varname].value
 
-    def getval(self, varname: str)->str:
+    def getval(self, varname: str) -> str:
         # return a copy of the variable
         return copy.deepcopy(self.getvar(varname))
 

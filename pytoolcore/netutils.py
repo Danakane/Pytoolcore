@@ -4,6 +4,7 @@ import struct
 import ipaddress
 import re
 import typing
+from pytoolcore import exception
 
 
 def getsockinfo(host: str, port: int = None, protocol: int = socket.AF_UNSPEC) \
