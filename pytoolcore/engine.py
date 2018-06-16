@@ -185,6 +185,10 @@ class Engine:
             print(style.Style.info(self.__moduleref__ + " commands"))
             for cmdname, _ in self.__dictcmd__.items():
                 print(cmdname)
+        elif keyword == "AUTHOR":
+            print(style.Style.info(self.__author__))
+        elif keyword == "NAME":
+            print(style.Style.info(self.__modulename__))
         else:
             try:
                 print(self.__dictvar__[keyword].value)
