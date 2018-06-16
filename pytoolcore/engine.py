@@ -284,6 +284,8 @@ class Engine:
             except (KeyboardInterrupt, SystemExit):
                 print()
                 break
+            except(KeyError, ValueError) as err:
+                print(style.Style.error(str(err)))
             except exception.CException as err:
                 print(str(err))
                 break
