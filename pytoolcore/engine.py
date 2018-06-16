@@ -1,5 +1,6 @@
 import copy
 import typing
+import readline
 
 from pytoolcore import style
 from pytoolcore import command
@@ -106,10 +107,12 @@ class Engine:
                                  helpstr="Description : display option(s) and command(s)\n" +
                                          "Usage : show {keyword} \n" +
                                          "Note :\n" +
-                                         "\tuse 'show options' " +
-                                         "to display valid keywords" +
+                                         "\tuse 'show name' to display module's name\n" +
+                                         "\tuse 'show author' to display module's author\n" +
                                          "\tuse 'show commands' to display the module's " +
-                                         "commands"
+                                         "commands\n"
+                                         "\tuse 'show options' " +
+                                         "to display other valid keywords"
                                  ),
              "exit": CommandSlot(fct=self.__exit__, cmd=cmdexit,
                                  helpstr="Description : exit the current module\n" +
@@ -272,7 +275,7 @@ class Engine:
     def splash(self) -> None:
         print("\n\t" + self.__modulename__ + " module by " + self.__author__ + "\n")
 
-    def run(self) -> None:
+    def start(self) -> None:
         self.__running__ = True
         while self.__running__:
             try:
