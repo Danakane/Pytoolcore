@@ -78,14 +78,14 @@ class Style:
             padding = "\t\t\t"
         elif len(value) <= 21:
             padding = "\t\t"
-        return padding + value
+        return value + padding
 
     @staticmethod
     def varnamepadding(varname: str)-> str:
         padding = "\t"
         if len(varname) <= 5:
             padding = "\t\t"
-        return padding + varname
+        return varname + padding
 
 
 def clear()-> None:
