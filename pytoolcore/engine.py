@@ -141,7 +141,7 @@ class Engine:
             print(style.Style.error("Keyword " + cmd + " isn't a defined command."))
         return True
 
-    def __set__(self, varname: str, value: str) -> bool:
+    def __set__(self, varname: str, value: str) -> None:
         varname = varname.upper()
         try:
             self.__dictvar__[varname].value = value
@@ -154,9 +154,8 @@ class Engine:
                                       " to " + str(value) + " with set command"))
         except KeyError:
             print(style.Style.error("Variable " + varname + " isn't defined."))
-        return True
 
-    def __reset__(self, varname: str) -> bool:
+    def __reset__(self, varname: str) -> None:
         varname = varname.upper()
         if varname == "ALL" or varname == "*":
             for _, var in self.__dictvar__.items():
@@ -166,7 +165,6 @@ class Engine:
                     pass
         else:
             self.__set__(varname, "")
-        return True
 
     def __show__(self, keyword: str) -> None:
         keyword = keyword.upper()
@@ -264,7 +262,7 @@ class Engine:
 
     def getvar(self, varname: str) -> str:
         # return the variable
-        varname = varname.upper()
+        varname = varname.lower()
         return self.__dictvar__[varname].value
 
     def getval(self, varname: str) -> str:
@@ -284,9 +282,9 @@ class Engine:
     def start(self) -> None:
         readline.set_completer_delims('\t')
         readline.parse_and_bind("tab: complete")
-        readline.set_completer(self.completer)
         self.__running__ = True
         while self.__running__:
+            readline.set_completer(self.completer)
             try:
                 cmdline = input(self.ref + " > ")
                 self.__call__(cmdline=cmdline)
@@ -305,15 +303,16 @@ class Engine:
         pass
 
     def completer(self, text: str, state: int)->str:
-        text = text.lower()
-        subtext: str = text.split(" ")[-1]
+        subtext: str = text.split(" ")[-1].lower()
         if len(text.split(" ")) == 1:
             wordslist: typing.List[str] = list(self.__dictcmd__.keys())
         else:
-            cmdname: str = text.split(" ")[0]
+            cmdname: str = text.split(" ")[0].lower()
             wordslist = self.__dictcmd__[cmdname].cmd.__completionlist__
         retlist: typing.List[str] = text.split(" ")[:-1]
-        retlist.append([x for x in wordslist if x.startswith(subtext, 0)][state])
+        retlist.append([x for x in wordslist if x.lower().startswith(subtext, 0) and
+                        x.lower() not in text.lower().split(" ") and
+                        (subtext.strip() != "")][state])
         return " ".join(retlist)
 
     def moduleref(self) -> str:
