@@ -186,9 +186,9 @@ class Engine:
             for cmdname, _ in self.__dictcmd__.items():
                 print(cmdname)
         elif keyword == "AUTHOR":
-            print(style.Style.info(self.__author__))
+            print(style.Style.info(self.author))
         elif keyword == "NAME":
-            print(style.Style.info(self.__modulename__))
+            print(style.Style.info(self.name))
         else:
             try:
                 print(self.__dictvar__[keyword].value)
@@ -270,7 +270,7 @@ class Engine:
         self.__show__(keyword)
 
     def splash(self) -> None:
-        print("\n\t" + self.__modulename__ + " module by " + self.__author__ + "\n")
+        print("\n\t" + self.__modulename__ + " module by " + self.author + "\n")
 
     def start(self) -> None:
         self.__running__ = True
@@ -297,5 +297,9 @@ class Engine:
     def modulename(self) -> str:
         return self.__modulename__
 
-    def author(self) -> str:
+    def authorname(self) -> str:
         return self.__author__
+
+    ref = property(moduleref)
+    name = property(modulename)
+    author = property(authorname)
