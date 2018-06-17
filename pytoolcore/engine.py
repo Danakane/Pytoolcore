@@ -286,6 +286,7 @@ class Engine:
             except exception.CException as err:
                 print(str(err))
                 break
+        self.stop()
         return
 
     def stop(self) -> None:
