@@ -109,10 +109,8 @@ class Engine:
                                          "Note :\n" +
                                          "\tuse 'show name' to display module's name\n" +
                                          "\tuse 'show author' to display module's author\n" +
-                                         "\tuse 'show commands' to display the module's " +
-                                         "commands\n"
-                                         "\tuse 'show options' " +
-                                         "to display other valid keywords"
+                                         "\tuse 'show commands' to display the module's commands\n"
+                                         "\tuse 'show options' to display other valid keywords"
                                  ),
              "exit": CommandSlot(fct=self.__exit__, cmd=cmdexit,
                                  helpstr="Description : exit the current module\n" +
