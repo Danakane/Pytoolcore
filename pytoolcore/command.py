@@ -23,7 +23,7 @@ class Argument:
 class Command:
 
     def __init__(self, cmdname: str, nargslist: typing.List[Argument]=None,
-                 nbpositionals: int=0)->None:
+                 nbpositionals: int=0, completionlist: typing.List[str] = None)->None:
         self.__cmdname__: str = cmdname.lower()
         self.__args__: typing.List[str] = []
         self.__nbpositionals__: int = nbpositionals
@@ -31,6 +31,10 @@ class Command:
         if nargslist is not None:
             for narg in nargslist:
                 self.__kwargs__[narg.__argname__] = narg.clone()
+        self.__completionlist__: typing.List[str] = list(self.__kwargs__.keys())
+        if not completionlist:
+            completionlist: typing.List[str] = []
+        self.__completionlist__ += completionlist
 
     def clone(self):
         # return a deep copy of the command object

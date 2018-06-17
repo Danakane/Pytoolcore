@@ -1,4 +1,5 @@
 import copy
+import sys
 import typing
 import readline
 
@@ -79,7 +80,8 @@ class Engine:
         cmdhelp: command.Command = command.Command(cmdname="help", nbpositionals=1)
         cmdset: command.Command = command.Command(cmdname="set", nbpositionals=2)
         cmdreset: command.Command = command.Command(cmdname="reset", nbpositionals=1)
-        cmdshow: command.Command = command.Command(cmdname="show", nbpositionals=1)
+        cmdshow: command.Command = command.Command(cmdname="show", nbpositionals=1,
+                                                   completionlist=["commands", "name", "author", "options"])
         cmdexit: command.Command = command.Command(cmdname="exit")
         cmdclear: command.Command = command.Command(cmdname="clear")
         self.__dictcmd__: typing.Dict[str, CommandSlot] = \
@@ -122,6 +124,9 @@ class Engine:
                                                    "Usage : clear"
                              )
              }
+
+    def __autoupdatehelp__(self):
+        self.__dictcmd__["help"].cmd.__completionlist__ = list(self.__dictcmd__.keys())
 
     def __exit__(self) -> bool:
         self.__running__ = False
@@ -166,7 +171,7 @@ class Engine:
     def __show__(self, keyword: str) -> None:
         keyword = keyword.upper()
         if keyword == "OPTIONS":
-            infotext: str = style.Style.info(self.__moduleref__ + "'s options")
+            infotext: str = style.Style.info(self.ref + "'s options")
             print(infotext)
             print(len(infotext) * "=" + "\n")
             print("| Option\t| Current setting\t\t| Settable\t\t| Description")
@@ -183,7 +188,7 @@ class Engine:
             print()
         elif keyword == "COMMANDS":
             print(style.Style.info(self.__moduleref__ + " commands"))
-            for cmdname, _ in self.__dictcmd__.items():
+            for cmdname in self.__dictcmd__.keys():
                 print(cmdname)
         elif keyword == "AUTHOR":
             print(style.Style.info(self.author))
@@ -205,11 +210,14 @@ class Engine:
             cmdname: str = cmdline.split()[0].lower()  # trigger exception if empty cmdline
             try:
                 # Make a copy of the command to avoid modifying the model
-                cmd: command.Command = self.__dictcmd__[cmdname].cmd.clone()
+                try:
+                    cmd: command.Command = self.__dictcmd__[cmdname].cmd.clone()
+                except KeyError:
+                    raise exception.CException("Command " + cmdname + " not found")
                 args, kwargs = cmd.parse(cmdline)
                 return self.__dictcmd__[cmdname].fct(*args, **kwargs)
-            except KeyError:
-                print(style.Style.error("Command " + cmdname + " not found"))
+            except KeyError as err:
+                print(style.Style.error("Key " + str(err) + " not found"))
             except exception.CException as err:
                 print(str(err))
         except IndexError:
@@ -229,6 +237,7 @@ class Engine:
             pass
         self.__dictcmd__[cmd.__cmdname__] = CommandSlot(fct=fct, cmd=cmd,
                                                         helpstr=str(helpstr))
+        self.__autoupdatehelp__()
 
     def removecmd(self, cmdname: str) -> None:
         del self.__dictcmd__[cmdname]
@@ -273,10 +282,13 @@ class Engine:
         print("\n\t" + self.__modulename__ + " module by " + self.author + "\n")
 
     def start(self) -> None:
+        readline.set_completer_delims('\t')
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(self.completer)
         self.__running__ = True
         while self.__running__:
             try:
-                cmdline = input(self.__moduleref__ + " > ")
+                cmdline = input(self.ref + " > ")
                 self.__call__(cmdline=cmdline)
             except (KeyboardInterrupt, SystemExit):
                 print()
@@ -291,6 +303,18 @@ class Engine:
 
     def stop(self) -> None:
         pass
+
+    def completer(self, text: str, state: int)->str:
+        text = text.lower()
+        subtext: str = text.split(" ")[-1]
+        if len(text.split(" ")) == 1:
+            wordslist: typing.List[str] = list(self.__dictcmd__.keys())
+        else:
+            cmdname: str = text.split(" ")[0]
+            wordslist = self.__dictcmd__[cmdname].cmd.__completionlist__
+        retlist: typing.List[str] = text.split(" ")[:-1]
+        retlist.append([x for x in wordslist if x.startswith(subtext, 0)][state])
+        return " ".join(retlist)
 
     def moduleref(self) -> str:
         return self.__moduleref__
