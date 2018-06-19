@@ -279,7 +279,7 @@ class Engine:
     def splash(self) -> None:
         print("\n\t" + self.__modulename__ + " module by " + self.author + "\n")
 
-    def start(self) -> None:
+    def run(self) -> None:
         readline.set_completer_delims('\t')
         readline.parse_and_bind("tab: complete")
         self.__running__ = True
