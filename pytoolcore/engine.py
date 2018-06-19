@@ -262,7 +262,7 @@ class Engine:
 
     def getvar(self, varname: str) -> str:
         # return the variable
-        varname = varname.lower()
+        varname = varname.upper()
         return self.__dictvar__[varname].value
 
     def getval(self, varname: str) -> str:
