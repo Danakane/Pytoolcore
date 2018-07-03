@@ -169,7 +169,7 @@ class Engine:
     def __show__(self, keyword: str) -> None:
         keyword = keyword.upper()
         if keyword == "OPTIONS":
-            infotext: str = style.Style.info(self.ref + "'s options")
+            infotext: str = style.Style.info(self.name + "'s options")
             print(infotext)
             print(len(infotext) * "=" + "\n")
             print("| Option\t| Current setting\t\t| Settable\t\t| Description")
@@ -185,13 +185,15 @@ class Engine:
                       "| " + settable + setpadding + "| " + description)
             print()
         elif keyword == "COMMANDS":
-            print(style.Style.info(self.__moduleref__ + " commands"))
+            print(style.Style.info(self.name + "'s commands"))
             for cmdname in self.__dictcmd__.keys():
                 print(cmdname)
         elif keyword == "AUTHOR":
-            print(style.Style.info(self.author))
+            print(style.Style.info(self.name + "'s author"))
+            print(self.author)
         elif keyword == "NAME":
-            print(style.Style.info(self.name))
+            print(style.Style.info(self.name + "'s name"))
+            print(self.name)
         else:
             try:
                 print(self.__dictvar__[keyword].value)
@@ -315,15 +317,14 @@ class Engine:
                         (subtext.strip() != "")][state])
         return " ".join(retlist)
 
-    def moduleref(self) -> str:
+    @property
+    def ref(self) -> str:
         return self.__moduleref__
 
-    def modulename(self) -> str:
+    @property
+    def name(self) -> str:
         return self.__modulename__
 
-    def authorname(self) -> str:
+    @property
+    def author(self) -> str:
         return self.__author__
-
-    ref = property(moduleref)
-    name = property(modulename)
-    author = property(authorname)
