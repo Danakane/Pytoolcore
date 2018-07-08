@@ -1,4 +1,3 @@
-
 import copy
 import typing
 
@@ -8,7 +7,7 @@ from pytoolcore import exception
 class Argument:
 
     def __init__(self, argname: str, hasvalue: bool, optional: bool,
-                 value: str=None, substitutes: typing.List[str]=None)->None:
+                 value: str = None, substitutes: typing.List[str] = None) -> None:
         self.__argname__: str = argname.lower()
         self.__hasvalue__: bool = hasvalue
         self.__optional__: bool = optional
@@ -22,8 +21,8 @@ class Argument:
 
 class Command:
 
-    def __init__(self, cmdname: str, nargslist: typing.List[Argument]=None,
-                 nbpositionals: int=0, completionlist: typing.List[str] = None)->None:
+    def __init__(self, cmdname: str, nargslist: typing.List[Argument] = None,
+                 nbpositionals: int = 0, completionlist: typing.List[str] = None) -> None:
         self.__cmdname__: str = cmdname.lower()
         self.__args__: typing.List[str] = []
         self.__nbpositionals__: int = nbpositionals
@@ -40,17 +39,17 @@ class Command:
         # return a deep copy of the command object
         return copy.deepcopy(self)
 
-    def __findarg__(self, argname)->typing.Optional[Argument]:
+    def __findarg__(self, argname) -> typing.Optional[Argument]:
         try:
             return self.__kwargs__[argname.lower()]
         except KeyError:
             return None
 
-    def __validate__(self)->None:
+    def __validate__(self) -> None:
         # check if all positionals arguments are present
         if len(self.__args__) != self.__nbpositionals__:
-            raise exception.CException("Command " + self.__cmdname__ +
-                                       " missing mandatory argument(s)")
+            raise exception.ErrorException("Command " + self.__cmdname__ +
+                                           " missing mandatory argument(s)")
         # check if all mandatory named arguments are present
         for argname, arg in self.__kwargs__.items():
             # check only if the argument is mandatory
@@ -65,13 +64,13 @@ class Command:
                             bfound = True
                             break
                     if not bfound:
-                        raise exception.CException("Command " + self.__cmdname__ +
-                                                   " missing mandatory keyword argument(s)")
+                        raise exception.ErrorException("Command " + self.__cmdname__ +
+                                                       " missing mandatory keyword argument(s)")
                 else:
-                    raise exception.CException("Command" + self.__cmdname__ +
-                                               " missing mandatory keyword argument(s)")
+                    raise exception.ErrorException("Command" + self.__cmdname__ +
+                                                   " missing mandatory keyword argument(s)")
 
-    def parse(self, cmdline)-> typing.Tuple[typing.List[str], typing.Dict[str, str]]:
+    def parse(self, cmdline) -> typing.Tuple[typing.List[str], typing.Dict[str, str]]:
         wordslist: typing.List[str] = cmdline.split()
         # remove 1st element since it's the command name
         wordslist = wordslist[1:]
@@ -87,9 +86,9 @@ class Command:
                         arg.__value__ = wordslist[i]
                     else:
                         # Wrong number of arguments, raise error
-                        raise exception.CException("Wrong number of " +
-                                                   "arguments for the command " +
-                                                   self.__cmdname__)
+                        raise exception.ErrorException("Wrong number of " +
+                                                       "arguments for the command " +
+                                                       self.__cmdname__)
             else:
                 # it's not an argument name
                 # maybe an positional argument
@@ -97,9 +96,9 @@ class Command:
                     self.__args__.append(wordslist[i])
                 else:
                     # Not even an cmd input, just exit
-                    raise exception.CException("Unexpected argument " +
-                                               wordslist[i] + " for the command " +
-                                               self.__cmdname__)
+                    raise exception.ErrorException("Unexpected argument " +
+                                                   wordslist[i] + " for the command " +
+                                                   self.__cmdname__)
             i += 1  # next step
         self.__validate__()
         args: typing.List[str] = self.__args__

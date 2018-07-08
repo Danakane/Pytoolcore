@@ -15,7 +15,7 @@ def getsockinfo(host: str, port: int = None, protocol: int = socket.AF_UNSPEC) \
 
         return sockinfo
     except socket.gaierror as err:
-        raise exception.CException(str(err))
+        raise exception.ErrorException(str(err))
 
 
 def getsockaddr(host: str, port: int = None, protocol: int = socket.AF_UNSPEC) \

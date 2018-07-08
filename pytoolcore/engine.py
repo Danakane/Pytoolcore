@@ -1,5 +1,4 @@
 import copy
-import sys
 import typing
 import readline
 
@@ -19,24 +18,24 @@ class VariableSlot:
         self.__settable__: str = settable
         self.__desc__: str = desc
 
-    def setvalue(self, value: str) -> None:
+    @property
+    def value(self) -> str:
+        return self.__value__
+
+    @value.setter
+    def value(self, value: str) -> None:
         if self.__settable__:
             self.__value__ = value
         else:
-            raise exception.CException("Variable not settable")
+            raise exception.ErrorException("Variable not settable")
 
-    def getvalue(self) -> str:
-        return self.__value__
-
-    def getdesc(self) -> str:
+    @property
+    def desc(self) -> str:
         return self.__desc__
 
-    def getsettable(self) -> str:
+    @property
+    def settable(self) -> str:
         return self.__settable__
-
-    value = property(getvalue, setvalue)
-    desc = property(getdesc)
-    settable = property(getsettable)
 
 
 class CommandSlot:
@@ -149,7 +148,7 @@ class Engine:
                 value = '""'
             print(style.Style.success("Variable " + varname +
                                       " set to " + str(value)))
-        except exception.CException:
+        except exception.ErrorException:
             print(style.Style.failure("Impossible to assign " + varname +
                                       " to " + str(value) + " with set command"))
         except KeyError:
@@ -161,7 +160,7 @@ class Engine:
             for _, var in self.__dictvar__.items():
                 try:
                     var.value = ""
-                except exception.CException:
+                except exception.ErrorException:
                     pass
         else:
             self.__set__(varname, "")
@@ -213,12 +212,13 @@ class Engine:
                 try:
                     cmd: command.Command = self.__dictcmd__[cmdname].cmd.clone()
                 except KeyError:
-                    raise exception.CException("Command " + cmdname + " not found")
+                    raise exception.ErrorException("Command " + cmdname + " not found")
                 args, kwargs = cmd.parse(cmdline)
                 return self.__dictcmd__[cmdname].fct(*args, **kwargs)
             except KeyError as err:
                 print(style.Style.error("Key " + str(err) + " not found"))
-            except exception.CException as err:
+            except (exception.ErrorException, exception.FailureException, exception.WarningException,
+                    exception.InfoException, exception.SuccessException) as err:
                 print(str(err))
         except IndexError:
             # empty input
@@ -295,7 +295,7 @@ class Engine:
                 break
             except(KeyError, ValueError) as err:
                 print(style.Style.error(str(err)))
-            except exception.CException as err:
+            except exception.ErrorException as err:
                 print(str(err))
                 break
         self.stop()
