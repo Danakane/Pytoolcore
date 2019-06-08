@@ -3,12 +3,20 @@ import socket
 import typing
 
 
-def bytes2str(msg: bytes)->str:
-    return msg.decode("utf-8")
+def bytes2str(b: bytes)->str:
+    return b.decode("utf-8")
 
 
-def str2bytes(msg: str)->bytes:
-    return msg.encode()
+def str2bytes(s: str)->bytes:
+    return s.encode()
+
+
+def bytes2hex(b: bytes)->str:
+    return "0x" + b.hex()
+
+
+def int2hex(i: int, bytesorder: str) -> str:
+    return "0x" + struct.pack(bytesorder, i).hex()
 
 
 def str2bytesnoencoding(msg: str)->bytes:
