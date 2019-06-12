@@ -1,5 +1,6 @@
 import copy
 import typing
+import shlex
 
 from pytoolcore import exception
 
@@ -71,7 +72,7 @@ class Command:
                                                    " missing mandatory keyword argument(s)")
 
     def parse(self, cmdline) -> typing.Tuple[typing.List[str], typing.Dict[str, str]]:
-        wordslist: typing.List[str] = cmdline.split()
+        wordslist: typing.List[str] = shlex.split(cmdline, posix=False)
         # remove 1st element since it's the command name
         wordslist = wordslist[1:]
         i: int = 0

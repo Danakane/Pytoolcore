@@ -1,6 +1,7 @@
 import copy
 import typing
 import readline
+import shlex
 
 from pytoolcore import style
 from pytoolcore import command
@@ -206,7 +207,7 @@ class Engine:
     def __call__(self, cmdline) -> bool:
         # unpack arguments and call function
         try:
-            cmdname: str = cmdline.split()[0].lower()  # trigger exception if empty cmdline
+            cmdname: str = shlex.split(cmdline)[0].lower()  # trigger exception if empty cmdline
             try:
                 # Make a copy of the command to avoid modifying the model
                 try:
