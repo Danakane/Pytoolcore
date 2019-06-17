@@ -230,6 +230,14 @@ class Engine:
     #                                       Public section                                      #
     # ------------------------------------------------------------------------------------------#
 
+    @property
+    def modulename(self) -> str:
+        return self.__modulename__
+
+    @property
+    def moduleref(self) -> str:
+        return self.__moduleref__
+
     def addcmd(self, cmd: command.Command, fct: typing.Callable,
                helpstr: str) -> None:
         try:
