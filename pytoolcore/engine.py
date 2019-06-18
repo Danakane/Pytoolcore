@@ -179,7 +179,8 @@ class Engine:
             print()
         else:
             try:
-                print(style.Style.tabulate(["Option", "Value"], [[keyword, self.__dictoptions__[keyword].value]]))
+                print(style.Style.tabulate(["Option", "Current Setting", "Description"],
+                                           [[keyword, self.getoptionvalue(keyword), self.getoptiondesc(keyword)]]))
                 print()
             except KeyError:
                 print(style.Style.error("Option {0} isn't defined.".format(keyword)))
