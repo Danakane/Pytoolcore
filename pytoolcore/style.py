@@ -76,7 +76,7 @@ class Style:
     @staticmethod
     def tabulate(headers: typing.List[str], table: typing.List[typing.List[str]],
                  withindex: bool = False, padsize: int = 1) -> str:
-        tab: str = tabulate.tabulate(table, headers, showindex=withindex)
+        tab: str = tabulate.tabulate(table, headers, numalign="left", showindex=withindex)
         pad: str = " " * 4 * padsize
         return pad + ("\n" + pad).join([line for line in tab.split('\n')])
 
