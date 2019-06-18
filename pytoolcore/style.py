@@ -1,3 +1,7 @@
+import os
+import typing
+import tabulate
+
 
 class Style:
     PURPLE = '\033[95m'
@@ -14,79 +18,68 @@ class Style:
     UNDERLINEEND = '\033[24m'
 
     @staticmethod
-    def purple(string: str)-> str:
+    def purple(string: str) -> str:
         return Style.PURPLE + string + Style.END
 
     @staticmethod
-    def cyan(string: str)-> str:
+    def cyan(string: str) -> str:
         return Style.CYAN + string + Style.END
 
     @staticmethod
-    def darkcyan(string: str)-> str:
+    def darkcyan(string: str) -> str:
         return Style.DARKCYAN + string + Style.END
 
     @staticmethod
-    def blue(string: str)-> str:
+    def blue(string: str) -> str:
         return Style.BLUE + string + Style.END
 
     @staticmethod
-    def green(string: str)-> str:
+    def green(string: str) -> str:
         return Style.GREEN + string + Style.END
 
     @staticmethod
-    def yellow(string: str)-> str:
+    def yellow(string: str) -> str:
         return Style.YELLOW + string + Style.END
 
     @staticmethod
-    def red(string: str)-> str:
+    def red(string: str) -> str:
         return Style.RED + string + Style.END
 
     @staticmethod
-    def bold(string)-> str:
+    def bold(string) -> str:
         return Style.BOLD + string + Style.BOLDEND
 
     @staticmethod
-    def underline(string)-> str:
+    def underline(string) -> str:
         return Style.UNDERLINE + string + Style.UNDERLINEEND
 
     @staticmethod
-    def error(string: str)-> str:
+    def error(string: str) -> str:
         return Style.red("(!) Error: ") + string
 
     @staticmethod
-    def warning(string: str)-> str:
+    def warning(string: str) -> str:
         return Style.yellow(Style.underline("/!\\")) + Style.yellow(" Warning: ") + string
 
     @staticmethod
-    def info(string: str)-> str:
+    def info(string: str) -> str:
         return Style.darkcyan("(i) Information: ") + string
 
     @staticmethod
-    def failure(string: str)-> str:
+    def failure(string: str) -> str:
         return Style.red("[-] Failure: ") + string
 
     @staticmethod
-    def success(string: str)-> str:
+    def success(string: str) -> str:
         return Style.green("[+] Success: ") + string
 
     @staticmethod
-    def valuepadding(value: str)-> str:
-        padding = "\t"
-        if len(value) <= 5:
-            padding = "\t\t\t\t"
-        elif len(value) <= 13:
-            padding = "\t\t\t"
-        elif len(value) <= 21:
-            padding = "\t\t"
-        return value + padding
-
-    @staticmethod
-    def varnamepadding(varname: str)-> str:
-        padding = "\t"
-        if len(varname) <= 5:
-            padding = "\t\t"
-        return varname + padding
+    def tabulate(headers: typing.List[str], table: typing.List[typing.List[str]],
+                 withindex: bool = False, padsize: int = 1) -> str:
+        tab: str = tabulate.tabulate(table, headers, showindex=withindex)
+        pad: str = " " * 4 * padsize
+        return pad + ("\n" + pad).join([line for line in tab.split('\n')])
 
 
-def clear()-> None:
-    print("\x1b[2J\x1b[H", end="")
+def clear() -> None:
+    os.system("clear")

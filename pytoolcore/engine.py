@@ -12,11 +12,10 @@ from pytoolcore import exception
 #                                       Data structures                                         #
 # ----------------------------------------------------------------------------------------------#
 
-class VariableSlot:
-    def __init__(self, varname: str, value: str, settable: str, desc: str = "") -> None:
-        self.__varname__: str = varname
+class Option:
+    def __init__(self, optname: str, value: str, desc: str = "") -> None:
+        self.__optname__: str = optname
         self.__value__: str = value
-        self.__settable__: str = settable
         self.__desc__: str = desc
 
     @property
@@ -25,18 +24,11 @@ class VariableSlot:
 
     @value.setter
     def value(self, value: str) -> None:
-        if self.__settable__:
-            self.__value__ = value
-        else:
-            raise exception.ErrorException("Variable not settable")
+        self.__value__ = value
 
     @property
     def desc(self) -> str:
         return self.__desc__
-
-    @property
-    def settable(self) -> str:
-        return self.__settable__
 
 
 class CommandSlot:
@@ -74,7 +66,7 @@ class Engine:
         self.__moduleref__: str = moduleref
         self.__modulename__: str = modulename
         self.__author__: str = author
-        self.__dictvar__: typing.Dict[str, VariableSlot] = {}
+        self.__dictoptions__: typing.Dict[str, Option] = {}
         self.__running__: bool = False
 
         cmdhelp: command.Command = command.Command(cmdname="help", nbpositionals=1)
@@ -91,19 +83,15 @@ class Engine:
                                  ),
              "set": CommandSlot(fct=self.__set__,
                                 cmd=cmdset,
-                                helpstr="Description : set a variable with a value\n" +
+                                helpstr="Description : set an option with a value\n" +
                                         "Usage : set {variable} {value}\n" +
-                                        "Note : Use 'show options' to display " +
-                                        "settable variable"
+                                        "Note : Use 'show options' to display available options"
                                 ),
              "reset": CommandSlot(fct=self.__reset__, cmd=cmdreset,
                                   helpstr="Description : reset a variable\n" +
-                                          "Usage : reset {variable}\n" +
+                                          "Usage : reset {options}\n" +
                                           "Note : " +
-                                          "Use 'show options' to display " +
-                                          "resettable variable" +
-                                          "Use 'reset all' to reset " +
-                                          "all variables"
+                                          "Use 'show options' to display available options"
                                   ),
              "show": CommandSlot(fct=self.__show__, cmd=cmdshow,
                                  helpstr="Description : display option(s) and command(s)\n" +
@@ -134,71 +122,67 @@ class Engine:
 
     def __help__(self, cmd: str) -> bool:
         try:
-            print(style.Style.info("Here is " + cmd + "'s help\n" +
-                                   self.__dictcmd__[cmd].__help__))
-
+            print(style.Style.info("{0}'s help\n{1}".format(cmd, self.__dictcmd__[cmd].__help__)))
         except KeyError:
-            print(style.Style.error("Keyword " + cmd + " isn't a defined command."))
+            print(style.Style.error("Keyword {0} isn't a defined command.".format(cmd)))
         return True
 
-    def __set__(self, varname: str, value: str) -> None:
-        varname = varname.upper()
+    def __set__(self, optname: str, value: str, verbose: bool = True) -> None:
+        optname = optname.lower()
         try:
-            self.__dictvar__[varname].value = value
+            self.__dictoptions__[optname].value = value
             if not value:
                 value = '""'
-            print(style.Style.success("Variable " + varname +
-                                      " set to " + str(value)))
+            if verbose:
+                print(style.Style.success("Option {0} set at {1}".format(optname, str(value))))
         except exception.ErrorException:
-            print(style.Style.failure("Impossible to assign " + varname +
-                                      " to " + str(value) + " with set command"))
+            if verbose:
+                print(style.Style.failure("Impossible to assign {0} to {1} with set command".format(
+                    optname, str(value))))
         except KeyError:
-            print(style.Style.error("Variable " + varname + " isn't defined."))
+            if verbose:
+                print(style.Style.error(str.format("Option {0} isn't defined.", optname)))
 
-    def __reset__(self, varname: str) -> None:
-        varname = varname.upper()
-        if varname == "ALL" or varname == "*":
-            for _, var in self.__dictvar__.items():
-                try:
-                    var.value = ""
-                except exception.ErrorException:
-                    pass
+    def __reset__(self, optname: str) -> None:
+        optname = optname.lower()
+        if optname == "all" or optname == "*":
+            for option in self.getoptnames():
+                self.__set__(option, "", False)
         else:
-            self.__set__(varname, "")
+            self.__set__(optname, "", False)
 
     def __show__(self, keyword: str) -> None:
-        keyword = keyword.upper()
-        if keyword == "OPTIONS":
-            infotext: str = style.Style.info(self.name + "'s options")
-            print(infotext)
-            print(len(infotext) * "=" + "\n")
-            print("| Option\t| Current setting\t\t| Settable\t\t| Description")
-            print("---------\t-------------------\t\t------------\t\t" +
-                  "--------------")
-            for varname, var in self.__dictvar__.items():
-                value: str = var.value
-                description: str = var.desc
-                settable: str = var.settable
-                setpadding: str = "\t\t\t"
-                print("| " + style.Style.varnamepadding(varname) +
-                      "| " + style.Style.valuepadding(value) +
-                      "| " + settable + setpadding + "| " + description)
+        keyword = keyword.lower()
+        if keyword == "options":
+            print(style.Style.info("{0}'s options".format(self.name)))
+            headers: typing.List[str] = ["Option", "Current setting", "Description"]
+            table: typing.List[typing.List[str]] = []
+            for optname, opt in self.__dictoptions__.items():
+                table.append([optname, opt.value, opt.desc])
+            print(style.Style.tabulate(headers, table))
             print()
-        elif keyword == "COMMANDS":
-            print(style.Style.info(self.name + "'s commands"))
-            for cmdname in self.__dictcmd__.keys():
-                print(cmdname)
-        elif keyword == "AUTHOR":
-            print(style.Style.info(self.name + "'s author"))
-            print(self.author)
-        elif keyword == "NAME":
-            print(style.Style.info(self.name + "'s name"))
-            print(self.name)
+        elif keyword == "commands":
+            print(style.Style.info("{0}'s commands".format(self.name)))
+            headers: typing.List[str] = ["Command", "Help"]
+            table: typing.List[typing.List[str]] = []
+            for cmdname, cmd in self.__dictcmd__.items():
+                table.append([cmdname, cmd.cmdhelp])
+            print(style.Style.tabulate(headers, table, True))
+            print()
+        elif keyword == "author":
+            print(style.Style.info("{0}'s author".format(self.name)))
+            print(style.Style.tabulate(["Author"], [[self.author]]))
+            print()
+        elif keyword == "name":
+            print(style.Style.info("{0}'s name".format(self.name)))
+            print(style.Style.tabulate(["Name"], [[self.name]]))
+            print()
         else:
             try:
-                print(self.__dictvar__[keyword].value)
+                print(style.Style.tabulate(["Option", "Value"], [[keyword, self.__dictoptions__[keyword].value]]))
+                print()
             except KeyError:
-                print(style.Style.error("Variable " + keyword + " isn't defined."))
+                print(style.Style.error("Option {0} isn't defined.".format(keyword)))
 
     @staticmethod
     def __clear__() -> None:
@@ -213,11 +197,11 @@ class Engine:
                 try:
                     cmd: command.Command = self.__dictcmd__[cmdname].cmd.clone()
                 except KeyError:
-                    raise exception.ErrorException("Command " + cmdname + " not found")
+                    raise exception.ErrorException(str.format("Command {0} not found", cmdname))
                 args, kwargs = cmd.parse(cmdline)
                 return self.__dictcmd__[cmdname].fct(*args, **kwargs)
             except KeyError as err:
-                print(style.Style.error("Key " + str(err) + " not found"))
+                print(style.Style.error(str.format("Key {0} not found", str(err))))
             except (exception.ErrorException, exception.FailureException, exception.WarningException,
                     exception.InfoException, exception.SuccessException) as err:
                 print(str(err))
@@ -249,46 +233,57 @@ class Engine:
         self.__autoupdatehelp__()
 
     def removecmd(self, cmdname: str) -> None:
-        del self.__dictcmd__[cmdname]
+        try:
+            del self.__dictcmd__[cmdname]
+        except KeyError:
+            pass
 
-    def getvarnames(self) -> typing.List[str]:
-        varnames: typing.List[str] = []
-        for varname, var in self.__dictvar__.items():
-            varnames.append(varname)
-        return varnames
+    def getcmd(self, cmdname: str) -> CommandSlot:
+        return self.__dictcmd__[cmdname]
 
-    def addvar(self, varname: str, description: str,
-               settable: bool, value="") -> None:
-        if varname:
-            varname = varname.upper()
+    def getoptnames(self) -> typing.List[str]:
+        optnames: typing.List[str] = []
+        for optname, var in self.__dictoptions__.items():
+            optnames.append(optname)
+        return optnames
+
+    def addoption(self, optname: str, description: str, value="") -> None:
+        if optname:
+            optname = optname.lower()
             try:
-                del self.__dictvar__[varname]
+                del self.__dictoptions__[optname]
             except KeyError:
                 pass
-            self.__dictvar__[varname] = VariableSlot(varname=varname, value=value,
-                                                     desc=description,
-                                                     settable=str(bool(settable)).lower())
+            self.__dictoptions__[optname] = Option(optname=optname, value=value, desc=description)
         else:
-            print(style.Style.error("Variable must have a name"))
+            print(style.Style.error("Option must have a name"))
 
-    def getvar(self, varname: str) -> str:
-        # return the variable
-        varname = varname.upper()
-        return self.__dictvar__[varname].value
+    def removeoption(self, optname: str) -> None:
+        try:
+            del self.__dictoptions__[optname]
+        except KeyError:
+            pass
 
-    def getval(self, varname: str) -> str:
-        # return a copy of the variable
-        return copy.deepcopy(self.getvar(varname))
+    def getoption(self, optname: str) -> Option:
+        # return the option object
+        optname = optname.lower()
+        return self.__dictoptions__[optname]
 
-    def setvar(self, varname, value) -> None:
-        varname = varname.upper()
-        self.__set__(varname, value)
+    def getoptiondesc(self, optname: str):
+        return self.__dictoptions__[optname].desc
 
-    def show(self, keyword) -> None:
+    def getoptionvalue(self, optname: str) -> str:
+        return self.__dictoptions__[optname].value
+
+    def setvar(self, optname: str, value: str, verbose: bool = True) -> None:
+        optname = optname.lower()
+        self.__set__(optname, value, verbose)
+
+    def show(self, keyword: str) -> None:
         self.__show__(keyword)
 
     def splash(self) -> None:
-        print("\n\t" + self.__modulename__ + " module by " + self.author + "\n")
+        print("\n\t{0} module by {1} \n".format(self.__modulename__, self.author))
 
     def run(self) -> None:
         readline.set_completer_delims('\t')
@@ -313,7 +308,7 @@ class Engine:
     def stop(self) -> None:
         pass
 
-    def completer(self, text: str, state: int)->str:
+    def completer(self, text: str, state: int) -> str:
         subtext: str = text.split(" ")[-1].lower()
         if len(text.split(" ")) == 1:
             wordslist: typing.List[str] = list(self.__dictcmd__.keys())
